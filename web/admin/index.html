@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PadlHubScore Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/admin/assets/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <p class="eyebrow">PADLHUB SCORE</p>
+        <h1>Админ-панель турнира</h1>
+      </div>
+      <div class="topbar-actions">
+        <label class="field compact">
+          <span>Турнир</span>
+          <select id="tournamentSelect"></select>
+        </label>
+        <button id="refreshTournamentBtn" class="btn ghost">Обновить</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel stack">
+        <section class="card">
+          <h2>Создать турнир</h2>
+          <form id="createTournamentForm" class="stack tight">
+            <label class="field">
+              <span>Название</span>
+              <input name="name" required placeholder="PadlHub Open" />
+            </label>
+            <label class="field">
+              <span>Дата старта</span>
+              <input name="startsAt" type="datetime-local" />
+            </label>
+            <button class="btn primary" type="submit">Создать турнир</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>Добавить пару</h2>
+          <form id="createTeamForm" class="stack tight">
+            <label class="field">
+              <span>Игрок 1</span>
+              <input name="player1Name" required />
+            </label>
+            <label class="field">
+              <span>Игрок 2</span>
+              <input name="player2Name" required />
+            </label>
+            <label class="field">
+              <span>Название пары</span>
+              <input name="displayName" placeholder="опционально" />
+            </label>
+            <label class="field">
+              <span>Посев</span>
+              <input name="seed" type="number" min="1" />
+            </label>
+            <button class="btn primary" type="submit">Сохранить пару</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>Добавить корт</h2>
+          <form id="createCourtForm" class="stack tight">
+            <label class="field">
+              <span>Название</span>
+              <input name="name" required placeholder="Корт 1" />
+            </label>
+            <label class="field">
+              <span>Номер</span>
+              <input name="number" type="number" min="1" required />
+            </label>
+            <label class="field">
+              <span>Станция</span>
+              <input name="stationName" placeholder="Терехово" />
+            </label>
+            <button class="btn primary" type="submit">Сохранить корт</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>Добавить судью</h2>
+          <form id="createRefereeForm" class="stack tight">
+            <label class="field">
+              <span>Имя</span>
+              <input name="name" required />
+            </label>
+            <label class="field">
+              <span>Логин</span>
+              <input name="login" placeholder="referee_1" />
+            </label>
+            <label class="field">
+              <span>PIN</span>
+              <input name="pin" type="text" maxlength="8" placeholder="если пусто, сгенерируется" />
+            </label>
+            <button class="btn primary" type="submit">Создать судью</button>
+          </form>
+          <div id="refereeSecrets" class="notice muted">После создания здесь появятся токен и PIN.</div>
+        </section>
+
+        <section class="card">
+          <h2>Создать матч</h2>
+          <form id="createMatchForm" class="stack tight">
+            <label class="field">
+              <span>Раунд</span>
+              <input name="round" required placeholder="quarter_final" />
+            </label>
+            <label class="field">
+              <span>Номер матча</span>
+              <input name="matchNumber" type="number" min="1" required />
+            </label>
+            <label class="field">
+              <span>Пара 1</span>
+              <select name="team1Id" id="matchTeam1"></select>
+            </label>
+            <label class="field">
+              <span>Пара 2</span>
+              <select name="team2Id" id="matchTeam2"></select>
+            </label>
+            <label class="field">
+              <span>Корт</span>
+              <select name="courtId" id="matchCourt"></select>
+            </label>
+            <label class="field">
+              <span>Судья</span>
+              <select name="refereeId" id="matchReferee"></select>
+            </label>
+            <button class="btn primary" type="submit">Создать матч</button>
+          </form>
+        </section>
+      </aside>
+
+      <section class="content stack">
+        <section class="card">
+          <div class="card-head">
+            <h2>Live Overview</h2>
+            <div id="liveState" class="pill disconnected">SSE: off</div>
+          </div>
+          <div id="overviewGrid" class="overview-grid"></div>
+        </section>
+
+        <section class="card">
+          <h2>Пары</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Игроки</th>
+                  <th>Посев</th>
+                  <th>Статус</th>
+                </tr>
+              </thead>
+              <tbody id="teamsTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Корты</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Номер</th>
+                  <th>Название</th>
+                  <th>Станция</th>
+                  <th>Статус</th>
+                </tr>
+              </thead>
+              <tbody id="courtsTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Судьи</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Имя</th>
+                  <th>Логин</th>
+                  <th>Статус</th>
+                  <th>Последняя активность</th>
+                </tr>
+              </thead>
+              <tbody id="refereesTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Матчи</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Раунд</th>
+                  <th>Статус</th>
+                  <th>Счёт по сетам</th>
+                  <th>Текущий гейм</th>
+                  <th>Подача</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="matchesTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>События матча</h2>
+          <div id="eventsBox" class="events-list muted">Выберите матч и нажмите «События».</div>
+        </section>
+      </section>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="/admin/assets/app.js" type="module"></script>
+  </body>
+</html>

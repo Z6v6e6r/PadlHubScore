@@ -24,6 +24,20 @@ MVP backend for live scoring padel tournaments.
 - `/api/public/*`
 - `/api/stream/*`
 
+## Admin web UI
+
+- URL: `/admin`
+- Static assets: `/admin/assets/*`
+- Uses existing admin API and SSE stream in real time.
+- Current capabilities:
+  - create/select tournament;
+  - overview dashboard;
+  - create/list teams;
+  - create/list courts;
+  - create/list referees (with generated token + PIN output);
+  - create/list matches;
+  - open match event log.
+
 ## Quick start
 
 1. Copy env file:

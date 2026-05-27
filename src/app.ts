@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import pino from 'pino';
+import { resolve } from 'node:path';
 import { ZodError } from 'zod';
 import { healthRouter } from './routes/health.js';
 import { streamRouter } from './routes/stream.js';
@@ -15,6 +16,7 @@ const logger = pino({
 
 export function createApp() {
   const app = express();
+  const adminWebDir = resolve(process.cwd(), 'web', 'admin');
 
   app.use(cors());
   app.use(express.json({ limit: '1mb' }));
@@ -28,6 +30,11 @@ export function createApp() {
   app.use('/api/admin', adminRouter);
   app.use('/api/referee', refereeRouter);
   app.use('/api/public', publicRouter);
+
+  app.use('/admin/assets', express.static(adminWebDir));
+  app.get(['/admin', '/admin/'], (_req, res) => {
+    res.sendFile(resolve(adminWebDir, 'index.html'));
+  });
 
   app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     if (err instanceof ZodError) {

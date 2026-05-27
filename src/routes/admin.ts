@@ -19,6 +19,11 @@ const createTournamentSchema = z.object({
   startsAt: z.string().datetime().optional()
 });
 
+adminRouter.get('/tournaments', async (_req, res) => {
+  const tournaments = await TournamentModel.find({}).sort({ createdAt: -1 }).lean();
+  res.json(tournaments);
+});
+
 adminRouter.post('/tournaments', async (req, res) => {
   const payload = createTournamentSchema.parse(req.body);
 
@@ -77,6 +82,11 @@ adminRouter.post('/tournaments/:tournamentId/teams', async (req, res) => {
   res.status(201).json(team);
 });
 
+adminRouter.get('/tournaments/:tournamentId/teams', async (req, res) => {
+  const teams = await TeamModel.find({ tournamentId: req.params.tournamentId }).sort({ createdAt: -1 }).lean();
+  res.json(teams);
+});
+
 const courtSchema = z.object({
   name: z.string().min(1),
   number: z.number().int().positive(),
@@ -90,6 +100,11 @@ adminRouter.post('/tournaments/:tournamentId/courts', async (req, res) => {
     ...payload
   });
   res.status(201).json(court);
+});
+
+adminRouter.get('/tournaments/:tournamentId/courts', async (req, res) => {
+  const courts = await CourtModel.find({ tournamentId: req.params.tournamentId }).sort({ number: 1 }).lean();
+  res.json(courts);
 });
 
 const refereeSchema = z.object({
@@ -122,6 +137,13 @@ adminRouter.post('/tournaments/:tournamentId/referees', async (req, res) => {
     accessToken,
     pin
   });
+});
+
+adminRouter.get('/tournaments/:tournamentId/referees', async (req, res) => {
+  const referees = await RefereeModel.find({ tournamentId: req.params.tournamentId })
+    .sort({ createdAt: -1 })
+    .lean();
+  res.json(referees);
 });
 
 const createMatchSchema = z.object({
